@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAGFlow 完整安裝與使用教程</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            line-height: 1.6; color: #24292f; background-color: #ffffff;
+            padding: 20px; max-width: 1200px; margin: 0 auto;
+        }
+        h1 { font-size: 2em; font-weight: 600; padding-bottom: 0.3em;
+             border-bottom: 1px solid #d8dee4; margin-top: 24px; margin-bottom: 16px; }
+        h2 { font-size: 1.5em; font-weight: 600; padding-bottom: 0.3em;
+             border-bottom: 1px solid #d8dee4; margin-top: 24px; margin-bottom: 16px; }
+        h3 { font-size: 1.25em; font-weight: 600; margin-top: 24px; margin-bottom: 16px; }
+        h4 { font-size: 1em; font-weight: 600; margin-top: 24px; margin-bottom: 16px; }
+        h5 { font-size: 0.875em; font-weight: 600; margin-top: 24px; margin-bottom: 16px; }
+        p { margin-top: 0; margin-bottom: 16px; }
+        a { color: #0969da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ul, ol { padding-left: 2em; margin-top: 0; margin-bottom: 16px; }
+        li { margin-bottom: 0.25em; }
+        blockquote {
+            padding: 0 1em; color: #57606a; border-left: 0.25em solid #d0d7de;
+            margin-top: 0; margin-bottom: 16px;
+        }
+        code {
+            padding: 0.2em 0.4em; margin: 0; font-size: 85%;
+            background-color: rgba(175,184,193,0.2); border-radius: 6px;
+            font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+        }
+        pre {
+            padding: 16px; overflow: auto; font-size: 85%; line-height: 1.45;
+            background-color: #f6f8fa; border-radius: 6px; margin-top: 0; margin-bottom: 16px;
+        }
+        pre code { display: inline; padding: 0; margin: 0; overflow: visible;
+                   line-height: inherit; word-wrap: normal; background-color: transparent; border: 0; }
+        table {
+            border-spacing: 0; border-collapse: collapse; width: 100%;
+            margin-top: 0; margin-bottom: 16px; display: block; overflow: auto;
+        }
+        table th {
+            font-weight: 600; padding: 6px 13px; border: 1px solid #d0d7de;
+            background-color: #f6f8fa;
+        }
+        table td { padding: 6px 13px; border: 1px solid #d0d7de; }
+        table tr { background-color: #ffffff; border-top: 1px solid #d0d7de; }
+        table tr:nth-child(2n) { background-color: #f6f8fa; }
+        hr {
+            height: 0.25em; padding: 0; margin: 24px 0;
+            background-color: #d0d7de; border: 0;
+        }
+        strong { font-weight: 600; }
+        em { font-style: italic; }
+    </style>
+</head>
+<body>
+<h1>RAGFlow 完整安裝與使用教程</h1>
+
+<blockquote><p>本教程適用於 RAGFlow v0.22 及以後版本，特別說明如何配置 BAAI/bge-large-zh-v1.5 內嵌模型</p></blockquote>
+
+<h2>目錄</h2>
+
+<ol>
+<li><a href="#前置作業">前置作業</a></li>
+<li><a href="#下載與解壓縮-ragflow">下載與解壓縮 RAGFlow</a></li>
+<li><a href="#配置檔案修改詳解">配置檔案修改詳解</a></li>
+<li><a href="#內嵌模型配置">內嵌模型配置</a></li>
+<li><a href="#啟動-ragflow">啟動 RAGFlow</a></li>
+<li><a href="#首次登入與設定">首次登入與設定</a></li>
+<li><a href="#驗證與測試">驗證與測試</a></li>
+</ol>
+
+<hr>
+
+<h2>前置作業</h2>
+
+<h3>系統需求</h3>
+
+<p>在開始安裝 RAGFlow 之前，請確認您的系統符合以下最低需求：</p>
+
+<ul>
+<li><strong>作業系統</strong>: Windows 10/11、macOS、Linux</li>
+<li><strong>CPU</strong>: 至少 4 核心 (x86 架構)</li>
+<li><strong>記憶體</strong>: 至少 16GB RAM</li>
+<li><strong>硬碟空間</strong>: 至少 50GB 可用空間</li>
+<li><strong>Docker</strong>: Docker Desktop 24.0.0 或更高版本</li>
+<li><strong>Docker Compose</strong>: v2.26.1 或更高版本</li>
+</ul>
+
+<h3>Docker Desktop 安裝與設定</h3>
+
+<h4>1. 下載 Docker Desktop</h4>
+
+<p>前往 <a href="https://www.docker.com/products/docker-desktop/">Docker 官方網站</a> 下載適合您作業系統的 Docker Desktop。</p>
+
+<h4>2. 安裝 Docker Desktop</h4>
+
+<ul>
+<li><strong>Windows</strong>: 執行下載的 <code>.exe</code> 檔案，按照安裝精靈完成安裝</li>
+<li><strong>macOS</strong>: 拖曳 Docker.app 到應用程式資料夾</li>
+<li><strong>Linux</strong>: 按照官方文件進行安裝</li>
+</ul>
+
+<h4>3. 啟動 Docker Desktop</h4>
+
+<p>安裝完成後，啟動 Docker Desktop 並等待其完全啟動（系統托盤圖示應顯示為綠色）。</p>
+
+<h4>4. 驗證安裝</h4>
+
+<p>開啟 PowerShell (Windows) 或 Terminal (macOS/Linux)，執行以下命令驗證安裝：</p>
+
+<pre><code>docker --version
+docker compose version
+</code></pre>
+
+<p>應該看到類似以下輸出：</p>
+
+<pre><code>Docker version 24.0.0, build xxx
+Docker Compose version v2.26.1
+</code></pre>
+
+<hr>
+
+<h2>下載與解壓縮 RAGFlow</h2>
+
+<h3>1. 從 GitHub 下載 RAGFlow</h3>
+
+<p>前往 <a href="https://github.com/infiniflow/ragflow">RAGFlow GitHub Repository</a> 頁面：</p>
+
+<ol>
+<li>點擊綠色的 <strong>Code</strong> 按鈕</li>
+<li>選擇 <strong>Download ZIP</strong></li>
+<li>將 <code>ragflow-main.zip</code> 下載到您的電腦</li>
+</ol>
+
+<blockquote><p><strong>提示</strong>: 建議將檔案下載到桌面或其他容易找到的位置</p></blockquote>
+
+<h3>2. 解壓縮檔案</h3>
+
+<p>將下載的 <code>ragflow-main.zip</code> 解壓縮到您選擇的目錄。解壓縮後，您會看到以下主要目錄結構：</p>
+
+<pre><code>ragflow-main/
+├── docker/              # Docker 相關配置檔案（重要！）
+│   ├── .env
+│   ├── docker-compose.yml
+│   ├── docker-compose-base.yml
+│   ├── nginx/
+│   └── ...
+├── web/                 # 前端網頁界面
+├── api/                 # API 相關程式碼
+├── rag/                 # RAG 核心邏輯
+├── conf/                # 應用程式配置
+└── ...
+</code></pre>
+
+<h3>3. 進入 Docker 目錄</h3>
+
+<p>使用 PowerShell 進入解壓縮後的 <code>docker</code> 目錄：</p>
+
+<pre><code>cd ~\Desktop\ragflow-main\ragflow-main\docker
+</code></pre>
+
+<blockquote><p><strong>重要</strong>: 所有後續的 Docker 命令都必須在這個 <code>docker</code> 目錄下執行</p></blockquote>
+
+<hr>
+
+<h2>配置檔案修改詳解</h2>
+
+<p>在啟動 RAGFlow 之前，需要修改三個關鍵配置檔案。以下將詳細說明每個檔案的修改內容及原因。</p>
+
+<h3>1. `.env` 檔案修改</h3>
+
+<p><code>.env</code> 檔案包含 RAGFlow 的環境變數配置。以下是需要修改的關鍵項目：</p>
+
+<h4>修改項目一覽表</h4>
+
+<table>
+<thead><tr>
+<th>配置項</th>
+<th>原始值</th>
+<th>修改後值</th>
+<th>說明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>DOC_ENGINE</code></td>
+<td><code>elasticsearch</code></td>
+<td><code>infinity</code></td>
+<td>文件引擎類型</td>
+</tr>
+<tr>
+<td><code>DEVICE</code></td>
+<td><code>cpu</code></td>
+<td><code>gpu</code></td>
+<td>運算設備類型</td>
+</tr>
+<tr>
+<td><code>SVR<em>WEB</em>HTTP_PORT</code></td>
+<td><code>80</code></td>
+<td><code>8100</code></td>
+<td>Web HTTP 埠號</td>
+</tr>
+<tr>
+<td><code>SVR<em>WEB</em>HTTPS_PORT</code></td>
+<td><code>443</code></td>
+<td><code>1443</code></td>
+<td>Web HTTPS 埠號</td>
+</tr>
+<tr>
+<td><code>COMPOSE_PROFILES</code></td>
+<td>註解</td>
+<td>啟用 <code>tei-cpu</code></td>
+<td>Docker Compose Profile</td>
+</tr>
+<tr>
+<td><code>TEI_MODEL</code></td>
+<td><code>Qwen/Qwen3-Embedding-0.6B</code></td>
+<td><code>BAAI/bge-large-zh-v1.5</code></td>
+<td>內嵌模型</td>
+</tr>
+<tr>
+<td><code>USE_MINERU</code></td>
+<td>註解</td>
+<td><code>false</code></td>
+<td>MinerU 功能</td>
+</tr>
+<tr>
+<td><code>MINERU<em>DELETE</em>OUTPUT</code></td>
+<td>註解</td>
+<td><code>0</code></td>
+<td>MinerU 輸出保留</td>
+</tr>
+<tr>
+<td><code>MINERU_BACKEND</code></td>
+<td>註解</td>
+<td><code>pipeline</code></td>
+<td>MinerU 後端</td>
+</tr>
+</tbody></table>
+
+<h4>詳細修改說明</h4>
+
+<p>打開 <code>docker/.env</code> 檔案，進行以下修改：</p>
+
+<h5>1.1 文件引擎設定</h5>
+
+<pre><code># 原始值
+DOC_ENGINE=${DOC_ENGINE:-elasticsearch}
+
+# 修改為
+DOC_ENGINE=${DOC_ENGINE:-infinity}
+</code></pre>
+
+<p><strong>修改原因</strong>: Infinity 是更新且效能更好的文件引擎，提供更快的向量檢索速度。</p>
+
+<h5>1.2 運算設備設定</h5>
+
+<pre><code># 原始值
+DEVICE=${DEVICE:-cpu}
+
+# 修改為
+DEVICE=${DEVICE:-gpu}
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>如果您的電腦有 NVIDIA GPU 且已安裝 CUDA，使用 GPU 可大幅提升內嵌模型和推理速度</li>
+<li>如果沒有 GPU，請保持原始值 <code>cpu</code></li>
+</ul>
+
+<h5>1.3 Web 服務埠號設定</h5>
+
+<pre><code># 原始值
+SVR_WEB_HTTP_PORT=80
+SVR_WEB_HTTPS_PORT=443
+
+# 修改為
+SVR_WEB_HTTP_PORT=8100
+SVR_WEB_HTTPS_PORT=1443
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>預設的 80 和 443 埠可能已被其他服務佔用</li>
+<li>使用非特權埠 (>1024) 可避免權限問題</li>
+<li>8100 和 1443 是較不易衝突的埠號</li>
+</ul>
+
+<h5>1.4 啟用 TEI CPU Profile</h5>
+
+<pre><code># 原始值（被註解）
+# COMPOSE_PROFILES=${COMPOSE_PROFILES},tei-cpu
+
+# 修改為
+COMPOSE_PROFILES=${COMPOSE_PROFILES},tei-cpu
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>啟用 Text Embeddings Inference (TEI) CPU 服務</li>
+<li>v0.22 之後版本需要明確啟用此 profile 才能使用內嵌模型</li>
+<li>如果使用 GPU，也可以啟用 <code>tei-gpu</code> 替代</li>
+</ul>
+
+<h5>1.5 內嵌模型設定 ⭐ 重要</h5>
+
+<pre><code># 原始值
+TEI_MODEL=${TEI_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+
+# 修改為
+#TEI_MODEL=BAAI/bge-large-zh-v1.5
+TEI_MODEL=BAAI/bge-large-zh-v1.5
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li><strong>v0.22 之後的重要變更</strong>: RAGFlow 不再預設包含內嵌模型</li>
+<li>BAAI/bge-large-zh-v1.5 是針對中文優化的高品質內嵌模型</li>
+<li>模型維度為 1024，適合中文文檔的語義理解</li>
+<li>第一次啟動時會自動下載此模型（約 1.3GB）</li>
+</ul>
+
+<blockquote><p><strong>注意</strong>: 如果您主要處理英文文檔，可以使用 <code>BAAI/bge-large-en-v1.5</code> 或保持預設的 <code>Qwen/Qwen3-Embedding-0.6B</code></p></blockquote>
+
+<h5>1.6 MinerU 配置（可選）</h5>
+
+<pre><code># 啟用 MinerU（高品質 PDF 解析工具）
+USE_MINERU=false
+MINERU_EXECUTABLE="$HOME/uv_tools/.venv/bin/mineru"
+MINERU_DELETE_OUTPUT=0   # 保留輸出目錄
+MINERU_BACKEND=pipeline  # 使用 pipeline 後端
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>MinerU 提供更精確的 PDF 文檔解析</li>
+<li><code>MINERU<em>DELETE</em>OUTPUT=0</code> 保留中間輸出，便於除錯</li>
+<li>如果不需要可保持預設註解狀態</li>
+</ul>
+
+<hr>
+
+<h3>2. `docker-compose.yml` 檔案修改</h3>
+
+<p><code>docker-compose.yml</code> 定義了 RAGFlow 的服務容器配置。</p>
+
+<h4>修改項目一覽表</h4>
+
+<table>
+<thead><tr>
+<th>服務</th>
+<th>配置項</th>
+<th>原始值</th>
+<th>修改後值</th>
+<th>說明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>ragflow-server</code></td>
+<td><code>restart</code></td>
+<td><code>unless-stopped</code></td>
+<td><code>on-failure</code></td>
+<td>重啟策略</td>
+</tr>
+<tr>
+<td><code>ragflow-server</code></td>
+<td><code>command</code></td>
+<td>註解</td>
+<td>啟用 adminserver</td>
+<td>管理伺服器</td>
+</tr>
+<tr>
+<td><code>ragflow-server</code></td>
+<td><code>command</code></td>
+<td>註解</td>
+<td>啟用 mcpserver</td>
+<td>MCP 伺服器</td>
+</tr>
+</tbody></table>
+
+<h4>詳細修改說明</h4>
+
+<p>打開 <code>docker/docker-compose.yml</code> 檔案：</p>
+
+<h5>2.1 啟用 Admin Server</h5>
+
+<pre><code># 在 ragflow-server 服務的 command 區段
+# 原始值（被註解）
+# Example configuration to start Admin server:
+#   - --enable-adminserver
+
+# 修改為
+# Example configration to start Admin server:
+    #   - --enable-adminserver
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>Admin Server 提供系統管理界面</li>
+<li>可以監控系統狀態、管理用戶權限等</li>
+<li>根據需求決定是否啟用</li>
+</ul>
+
+<h5>2.2 啟用 MCP Server</h5>
+
+<pre><code># 原始值（被註解）
+#   - --enable-mcpserver
+#   - --mcp-host=0.0.0.0
+#   - --mcp-port=9382
+#   - --mcp-base-url=http://127.0.0.1:9380
+#   - --mcp-script-path=/ragflow/mcp/server/server.py
+#   - --mcp-mode=self-host
+#   - --mcp-host-api-key=ragflow-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 修改為（取消註解）
+      - --enable-mcpserver
+      - --mcp-host=0.0.0.0
+      - --mcp-port=9382
+      - --mcp-base-url=http://127.0.0.1:9380
+      - --mcp-script-path=/ragflow/mcp/server/server.py
+      - --mcp-mode=self-host
+      - --mcp-host-api-key=ragflow-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>MCP (Model Context Protocol) Server 提供外部整合介面</li>
+<li>允許與其他應用程式進行通訊</li>
+<li>適合需要 API 整合的場景</li>
+</ul>
+
+<h5>2.3 修改重啟策略</h5>
+
+<pre><code># 所有服務的 restart 設定
+# 原始值
+    restart: unless-stopped
+
+# 修改為
+    restart: on-failure
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li><code>on-failure</code>: 只在容器異常退出時重啟</li>
+<li><code>unless-stopped</code>: 除非手動停止，否則一直重啟</li>
+<li><code>on-failure</code> 更適合開發測試環境，避免問題容器持續重啟</li>
+</ul>
+
+<hr>
+
+<h3>3. `docker-compose-base.yml` 檔案修改</h3>
+
+<p><code>docker-compose-base.yml</code> 定義了 RAGFlow 底層服務的詳細配置。</p>
+
+<h4>修改項目一覽表</h4>
+
+<table>
+<thead><tr>
+<th>服務</th>
+<th>配置項</th>
+<th>原始值</th>
+<th>修改後值</th>
+<th>說明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>所有服務</td>
+<td><code>restart</code></td>
+<td><code>unless-stopped</code></td>
+<td><code>on-failure</code></td>
+<td>重啟策略</td>
+</tr>
+<tr>
+<td><code>infinity</code></td>
+<td><code>image</code></td>
+<td><code>v0.6.11</code></td>
+<td><code>v0.6.7</code></td>
+<td>Infinity 版本</td>
+</tr>
+<tr>
+<td><code>tei-cpu/gpu</code></td>
+<td><code>command</code></td>
+<td><code>/data/${TEI_MODEL}</code></td>
+<td><code>${TEI_MODEL}</code></td>
+<td>模型路徑</td>
+</tr>
+</tbody></table>
+
+<h4>詳細修改說明</h4>
+
+<p>打開 <code>docker/docker-compose-base.yml</code> 檔案：</p>
+
+<h5>3.1 修改所有服務的重啟策略</h5>
+
+<pre><code># 範例：以 es 服務為例
+es:
+  image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+  # 原始值
+  restart: unless-stopped
+  
+  # 修改為
+  restart: on-failure
+</code></pre>
+
+<p><strong>修改原因</strong>: 與 <code>docker-compose.yml</code> 相同，統一使用 <code>on-failure</code> 策略。</p>
+
+<h5>3.2 修改 Infinity 版本</h5>
+
+<pre><code>infinity:
+  # 原始值
+  image: infiniflow/infinity:v0.6.11
+  
+  # 修改為
+  image: infiniflow/infinity:v0.6.7
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li>v0.6.7 是經過充分測試的穩定版本</li>
+<li>v0.6.11 可能存在相容性問題</li>
+<li>如遇到問題可嘗試回退版本</li>
+</ul>
+
+<h5>3.3 修改 TEI 模型加載路徑 ⭐ 重要</h5>
+
+<pre><code># tei-cpu 服務
+tei-cpu:
+  # 原始值
+  command: ["--model-id", "/data/${TEI_MODEL}", "--auto-truncate"]
+  
+  # 修改為
+  command: ["--model-id", "${TEI_MODEL}", "--auto-truncate"]
+
+# tei-gpu 服務（如果使用 GPU）
+tei-gpu:
+  # 原始值
+  command: ["--model-id", "/data/${TEI_MODEL}", "--auto-truncate"]
+  
+  # 修改為
+  command: ["--model-id", "${TEI_MODEL}", "--auto-truncate"]
+</code></pre>
+
+<p><strong>修改原因</strong>: </p>
+<ul>
+<li><strong>v0.22 的關鍵變更</strong>: TEI 容器會自動從 HuggingFace 下載模型</li>
+<li>不再需要預先掛載本地模型目錄 <code>/data</code></li>
+<li>直接使用模型 ID（如 <code>BAAI/bge-large-zh-v1.5</code>）即可</li>
+<li>首次啟動時會自動下載到容器內部</li>
+</ul>
+
+<hr>
+
+<h2>內嵌模型配置</h2>
+
+<h3>v0.22 之後的重要變更</h3>
+
+<p>從 RAGFlow v0.22 開始，Docker 映像檔採用 "slim" 版本，不再預先包含內嵌模型。這意味著：</p>
+
+<ol>
+<li><strong>映像檔更小</strong>: 基礎映像檔從數 GB 減少到約 1GB</li>
+<li><strong>按需下載</strong>: 首次啟動時才下載您指定的模型</li>
+<li><strong>靈活配置</strong>: 可以輕鬆切換不同的內嵌模型</li>
+</ol>
+
+<h3>BAAI/bge-large-zh-v1.5 模型簡介</h3>
+
+<p><strong>BAAI/bge-large-zh-v1.5</strong> 是由北京智源人工智能研究院 (BAAI) 開發的中文內嵌模型：</p>
+
+<ul>
+<li><strong>模型大小</strong>: 約 1.3GB</li>
+<li><strong>向量維度</strong>: 1024 維</li>
+<li><strong>語言支援</strong>: 主要針對中文優化，也支持英文</li>
+<li><strong>適用場景</strong>: </li>
+</ul>
+<p>  - 中文文檔檢索</p>
+<p>  - 語義相似度計算</p>
+<p>  - RAG (Retrieval-Augmented Generation) 應用</p>
+
+<h3>模型下載流程</h3>
+
+<p>當您首次啟動 RAGFlow 時，TEI 服務會自動執行以下步驟：</p>
+
+<ol>
+<li><strong>檢查模型</strong>: 檢查容器內是否已存在指定的模型</li>
+<li><strong>連接 HuggingFace</strong>: 連接到 HuggingFace Model Hub</li>
+<li><strong>下載模型</strong>: 下載 <code>BAAI/bge-large-zh-v1.5</code> 模型檔案（約 1.3GB）</li>
+<li><strong>加載模型</strong>: 將模型加載到記憶體中</li>
+<li><strong>啟動服務</strong>: TEI 服務準備就緒，可接受內嵌請求</li>
+</ol>
+
+<blockquote><p><strong>注意</strong>: 首次下載可能需要 10-30 分鐘，取決於您的網路速度。請耐心等待。</p></blockquote>
+
+<h3>加速下載（可選）</h3>
+
+<p>如果您在中國大陸或網路連線不穩定，可以考慮：</p>
+
+<h4>方法一: 使用 HuggingFace 鏡像站</h4>
+
+<p>修改 <code>docker-compose-base.yml</code> 中的環境變數：</p>
+
+<pre><code>tei-cpu:
+  environment:
+    - HF_ENDPOINT=https://hf-mirror.com  # 使用鏡像站
+</code></pre>
+
+<h4>方法二: 預先下載模型到本地</h4>
+
+<p>如果您想完全離線部署：</p>
+
+<ol>
+<li>手動從 <a href="https://huggingface.co/BAAI/bge-large-zh-v1.5">HuggingFace</a> 下載模型</li>
+<li>將模型放置在本地目錄（如 <code>./models/bge-large-zh-v1.5/</code>）</li>
+<li>在 <code>docker-compose-base.yml</code> 中掛載目錄：</li>
+</ol>
+
+<pre><code>tei-cpu:
+  volumes:
+    - ./models:/data
+  command: ["--model-id", "/data/bge-large-zh-v1.5", "--auto-truncate"]
+</code></pre>
+
+<hr>
+
+<h2>啟動 RAGFlow</h2>
+
+<p>完成所有配置修改後，即可啟動 RAGFlow。</p>
+
+<h3>啟動命令</h3>
+
+<p>在 <code>docker</code> 目錄下，執行以下命令：</p>
+
+<pre><code>docker compose up -d
+</code></pre>
+
+<p><strong>參數說明</strong>:</p>
+<ul>
+<li><code>docker compose</code>: Docker Compose v2 命令（舊版為 <code>docker-compose</code>）</li>
+<li><code>up</code>: 啟動服務</li>
+<li><code>-d</code>: 以背景模式運行（detached mode）</li>
+</ul>
+
+<h3>啟動過程</h3>
+
+<p>執行命令後，您會看到類似以下輸出：</p>
+
+<pre><code>[+] Running 10/10
+ ✔ Network ragflow_ragflow        Created
+ ✔ Container ragflow-mysql        Started
+ ✔ Container ragflow-redis        Started
+ ✔ Container ragflow-es           Started
+ ✔ Container ragflow-infinity     Started
+ ✔ Container ragflow-tei-cpu      Starting...
+ ✔ Container ragflow-minio        Started
+ ✔ Container ragflow-server       Started
+</code></pre>
+
+<h3>檢查容器狀態</h3>
+
+<p>使用以下命令檢查所有容器是否正常運行：</p>
+
+<pre><code>docker compose ps
+</code></pre>
+
+<p>所有容器的 STATUS 應該顯示為 <code>Up</code> 或 <code>Up (healthy)</code>，例如：</p>
+
+<pre><code>NAME                  STATUS
+ragflow-mysql         Up (healthy)
+ragflow-redis         Up (healthy)
+ragflow-es            Up
+ragflow-infinity      Up
+ragflow-tei-cpu       Up
+ragflow-minio         Up (healthy)
+ragflow-server        Up
+</code></pre>
+
+<h3>查看日誌</h3>
+
+<h4>查看所有服務日誌</h4>
+
+<pre><code>docker compose logs -f
+</code></pre>
+
+<h4>查看特定服務日誌</h4>
+
+<pre><code># 查看 RAGFlow 主服務日誌
+docker compose logs -f ragflow-server
+
+# 查看 TEI 服務日誌（內嵌模型）
+docker compose logs -f tei-cpu
+
+# 查看 Infinity 日誌
+docker compose logs -f infinity
+</code></pre>
+
+<h3>首次啟動注意事項</h3>
+
+<p><strong>首次啟動時，請特別關注 <code>tei-cpu</code> 服務的日誌</strong>：</p>
+
+<pre><code>docker compose logs -f tei-cpu
+</code></pre>
+
+<p>您應該會看到模型下載的進度訊息：</p>
+
+<pre><code>Downloading model BAAI/bge-large-zh-v1.5...
+Downloading (1/5): config.json
+Downloading (2/5): model.safetensors
+Downloading (3/5): tokenizer.json
+...
+Model loaded successfully
+Server is ready to accept connections
+</code></pre>
+
+<blockquote><p><strong>注意</strong>: 模型下載期間，tei-cpu 容器可能會顯示 <code>Restarting</code> 狀態，這是正常現象。等待下載完成後，容器會穩定在 <code>Up</code> 狀態。</p></blockquote>
+
+<hr>
+
+<h2>首次登入與設定</h2>
+
+<h3>訪問 RAGFlow Web 界面</h3>
+
+<p>模型下載完成且所有服務正常運行後，即可訪問 RAGFlow：</p>
+
+<ol>
+<li>打開瀏覽器</li>
+<li>前往: <code>http://localhost:8100</code></li>
+<li>如果修改了 <code>SVR<em>WEB</em>HTTP_PORT</code>，請使用您設定的埠號</li>
+</ol>
+
+<h3>首次登入</h3>
+
+<p>RAGFlow 預設管理員帳號：</p>
+
+<ul>
+<li><strong>使用者名稱</strong>: <code>admin</code></li>
+<li><strong>密碼</strong>: <code>admin</code></li>
+</ul>
+
+<blockquote><p><strong>安全提示</strong>: 首次登入後，請立即修改預設密碼！</p></blockquote>
+
+<h3>配置內嵌模型</h3>
+
+<p>登入後，需要在 RAGFlow 界面中配置內嵌模型：</p>
+
+<h4>步驟 1: 進入模型提供商設定</h4>
+
+<ol>
+<li>點擊右上角的個人頭像</li>
+<li>選擇 <strong>Model Providers</strong>（模型提供商）</li>
+</ol>
+
+<h4>步驟 2: 添加 TEI 內嵌模型</h4>
+
+<ol>
+<li>點擊 <strong>Add LLM</strong> 按鈕</li>
+<li>填寫以下資訊：</li>
+</ol>
+<p>   - <strong>Model Type</strong>: 選擇 <code>Embedding</code></p>
+<p>   - <strong>Model Name</strong>: <code>bge-large-zh-v1.5</code></p>
+<p>   - <strong>Base URL</strong>: <code>http://tei-cpu:8080</code>（如果使用 GPU，則為 <code>http://tei-gpu:8080</code>）</p>
+<p>   - <strong>API Key</strong>: 留空（本地部署不需要）</p>
+<ol>
+<li>點擊 <strong>Save</strong> 儲存</li>
+</ol>
+
+<h4>步驟 3: 設定預設內嵌模型</h4>
+
+<ol>
+<li>返回個人頭像選單</li>
+<li>選擇 <strong>System Model Settings</strong>（系統模型設定）</li>
+<li>在 <strong>Embedding Model</strong> 下拉選單中選擇 <code>bge-large-zh-v1.5</code></li>
+<li>點擊 <strong>Save</strong> 儲存</li>
+</ol>
+
+<h3>配置 LLM（大型語言模型）</h3>
+
+<p>RAGFlow 還需要配置 LLM 來生成回答。您可以選擇：</p>
+
+<h4>選項 1: 使用本地 LLM（Ollama）</h4>
+
+<ol>
+<li>安裝 <a href="https://ollama.ai/">Ollama</a></li>
+<li>下載模型，例如：</li>
+</ol>
+<p>   ```powershell</p>
+<p>   ollama pull qwen2.5:7b</p>
+<p>   ```</p>
+<ol>
+<li>在 RAGFlow 的 <strong>Model Providers</strong> 中添加 Ollama：</li>
+</ol>
+<p>   - <strong>Provider Type</strong>: Ollama</p>
+<p>   - <strong>Base URL</strong>: <code>http://host.docker.internal:11434</code></p>
+<p>   - <strong>Model Name</strong>: <code>qwen2.5:7b</code></p>
+
+<h4>選項 2: 使用雲端 API</h4>
+
+<p>也可以使用 OpenAI、Azure OpenAI、Google Gemini 等雲端服務的 API。</p>
+
+<hr>
+
+<h2>驗證與測試</h2>
+
+<h3>驗證內嵌模型</h3>
+
+<h4>測試 TEI 服務</h4>
+
+<p>使用 curl 或 PowerShell 測試 TEI 服務是否正常：</p>
+
+<pre><code>curl -X POST http://localhost:8080/embed `
+  -H "Content-Type: application/json" `
+  -d '{"inputs": "測試文本"}'
+</code></pre>
+
+<p>如果返回包含向量的 JSON 回應，表示內嵌模型工作正常。</p>
+
+<h3>建立測試知識庫</h3>
+
+<h4>步驟 1: 建立知識庫</h4>
+
+<ol>
+<li>在 RAGFlow 首頁點擊 <strong>Datasets</strong>（資料集）</li>
+<li>點擊 <strong>Create Dataset</strong>（建立資料集）</li>
+<li>填寫資料集名稱，例如 "測試知識庫"</li>
+<li><strong>重要</strong>: 選擇 <strong>Embedding Model</strong> 為 <code>bge-large-zh-v1.5</code></li>
+<li>選擇 <strong>Chunking Method</strong>（分塊方法），推薦使用 <code>General</code></li>
+<li>點擊 <strong>Create</strong> 建立</li>
+</ol>
+
+<blockquote><p><strong>注意</strong>: 一旦選定內嵌模型並上傳文件，該資料集的內嵌模型就無法更改！</p></blockquote>
+
+<h4>步驟 2: 上傳測試文件</h4>
+
+<ol>
+<li>進入剛建立的資料集</li>
+<li>點擊 <strong>Upload</strong> 按鈕</li>
+<li>選擇一個測試文件（支援 PDF、DOCX、TXT、Markdown 等格式）</li>
+<li>上傳後，點擊 <strong>Parse</strong>（解析）按鈕</li>
+<li>等待文件解析完成（可在 <strong>Files</strong> 頁面查看進度）</li>
+</ol>
+
+<h4>步驟 3: 建立對話</h4>
+
+<ol>
+<li>點擊左側選單的 <strong>Chat</strong>（對話）</li>
+<li>點擊 <strong>Create Assistant</strong>（建立助手）</li>
+<li>選擇剛才建立的資料集</li>
+<li>選擇 LLM 模型</li>
+<li>開始測試對話！</li>
+</ol>
+
+<h3>測試問答</h3>
+
+<p>在對話框中輸入與上傳文件相關的問題，例如：</p>
+
+<pre><code>問：[您上傳文件的相關問題]
+</code></pre>
+
+<p>如果系統能夠正確引用文件內容並生成回答，表示 RAGFlow 安裝成功且運作正常！</p>
+
+<hr>
+
+<h2>常見問題與疑難排解</h2>
+
+<h3>Q1: TEI 容器持續重啟</h3>
+
+<p><strong>原因</strong>: 模型下載未完成或下載失敗</p>
+
+<p><strong>解決方法</strong>:</p>
+<ol>
+<li>查看 TEI 容器日誌：</li>
+</ol>
+<p>   ```powershell</p>
+<p>   docker compose logs -f tei-cpu</p>
+<p>   ```</p>
+<ol>
+<li>如果是網路問題，可以使用 HuggingFace 鏡像站（參考前文）</li>
+<li>等待模型完全下載完成（可能需要 10-30 分鐘）</li>
+</ol>
+
+<h3>Q2: 無法訪問 Web 界面</h3>
+
+<p><strong>可能原因</strong>:</p>
+<ul>
+<li>埠號衝突</li>
+<li>容器未正常啟動</li>
+</ul>
+
+<p><strong>解決方法</strong>:</p>
+<ol>
+<li>檢查埠號是否被佔用：</li>
+</ol>
+<p>   ```powershell</p>
+<table>
+<thead><tr>
+</tr></thead>
+<tbody>
+</tbody></table>
+<p>   ```</p>
+<ol>
+<li>確認所有容器都在運行：</li>
+</ol>
+<p>   ```powershell</p>
+<p>   docker compose ps</p>
+<p>   ```</p>
+<ol>
+<li>檢查 ragflow-server 日誌：</li>
+</ol>
+<p>   ```powershell</p>
+<p>   docker compose logs -f ragflow-server</p>
+<p>   ```</p>
+
+<h3>Q3: 記憶體不足</h3>
+
+<p><strong>原因</strong>: 運行所有服務需要大量記憶體</p>
+
+<p><strong>解決方法</strong>:</p>
+<ol>
+<li>關閉不必要的應用程式</li>
+<li>增加 Docker Desktop 的記憶體限制：</li>
+</ol>
+<p>   - 打開 Docker Desktop → Settings → Resources</p>
+<p>   - 增加 Memory 至至少 8GB</p>
+<ol>
+<li>如果仍不足，考慮使用 CPU 版本替代 GPU 版本</li>
+</ol>
+
+<h3>Q4: 模型下載速度慢</h3>
+
+<p><strong>解決方法</strong>:</p>
+<ul>
+<li>使用 HuggingFace 鏡像站（中國大陸用戶）</li>
+<li>或預先下載模型到本地並掛載（參考前文）</li>
+</ul>
+
+<h3>Q5: 文件解析失敗</h3>
+
+<p><strong>可能原因</strong>:</p>
+<ul>
+<li>文件格式不支援</li>
+<li>文件損壞</li>
+<li>解析服務異常</li>
+</ul>
+
+<p><strong>解決方法</strong>:</p>
+<ol>
+<li>確認文件格式在支援列表中</li>
+<li>嘗試重新上傳文件</li>
+<li>查看 ragflow-server 日誌排查錯誤</li>
+</ol>
+
+<hr>
+
+<h2>附錄：配置檔案修改總結</h2>
+
+<p>以下以左右對比的方式展示三個關鍵配置檔案的原始內容與修改後的內容。</p>
+
+<hr>
+
+<h3>一、`.env` 檔案修改對比</h3>
+
+<h4>修改項目 1: 文件引擎設定</h4>
+
+<table>
+<thead><tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>DOC<em>ENGINE=${DOC</em>ENGINE:-elasticsearch}</code></td>
+<td><code>DOC<em>ENGINE=${DOC</em>ENGINE:-infinity}</code></td>
+</tr>
+</tbody></table>
+
+<h4>修改項目 2: 運算設備設定</h4>
+
+<table>
+<thead><tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>DEVICE=${DEVICE:-cpu}</code></td>
+<td><code>DEVICE=${DEVICE:-gpu}</code></td>
+</tr>
+</tbody></table>
+
+<h4>修改項目 3: Web 服務埠號設定</h4>
+
+<table>
+<thead><tr>
+<th>配置項</th>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>HTTP Port</td>
+<td><code>SVR<em>WEB</em>HTTP_PORT=80</code></td>
+<td><code>SVR<em>WEB</em>HTTP_PORT=8100</code></td>
+</tr>
+<tr>
+<td>HTTPS Port</td>
+<td><code>SVR<em>WEB</em>HTTPS_PORT=443</code></td>
+<td><code>SVR<em>WEB</em>HTTPS_PORT=1443</code></td>
+</tr>
+</tbody></table>
+
+<h4>修改項目 4: 啟用 TEI CPU Profile</h4>
+
+<table>
+<thead><tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code># COMPOSE<em>PROFILES=${COMPOSE</em>PROFILES},tei-cpu</code></td>
+<td><code>COMPOSE<em>PROFILES=${COMPOSE</em>PROFILES},tei-cpu</code></td>
+</tr>
+</tbody></table>
+
+<h4>修改項目 5: 內嵌模型設定 ⭐ 重要</h4>
+
+<table>
+<tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr>
+<tr>
+<td>
+
+<pre><code>TEI_MODEL=${TEI_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+</code></pre>
+
+</td>
+<td>
+
+<pre><code>#TEI_MODEL=BAAI/bge-large-zh-v1.5
+TEI_MODEL=BAAI/bge-large-zh-v1.5
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+<h4>修改項目 6: MinerU 配置（可選）</h4>
+
+<table>
+<tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr>
+<tr>
+<td>
+
+<pre><code># Uncommenting these lines will automatically 
+# add MinerU to the model provider whenever possible.
+# MINERU_DELETE_OUTPUT=0   # keep output directory
+# MINERU_BACKEND=pipeline  # or another backend you prefer
+</code></pre>
+
+</td>
+<td>
+
+<pre><code># Enable Mineru
+USE_MINERU=false
+MINERU_EXECUTABLE="$HOME/uv_tools/.venv/bin/mineru"
+MINERU_DELETE_OUTPUT=0   # keep output directory
+MINERU_BACKEND=pipeline  # or another backend you prefer
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+<hr>
+
+<h3>二、`docker-compose.yml` 檔案修改對比</h3>
+
+<h4>修改項目 1: ragflow-server 重啟策略</h4>
+
+<table>
+<thead><tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>restart: unless-stopped</code></td>
+<td><code>restart: on-failure</code></td>
+</tr>
+</tbody></table>
+
+<h4>修改項目 2: 啟用 Admin Server 與 MCP Server</h4>
+
+<table>
+<tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr>
+<tr>
+<td>
+
+<pre><code>ragflow-server:
+  # ...其他配置
+  restart: unless-stopped
+  # Example configuration to start Admin server:
+  command:
+    - --enable-adminserver
+  # MCP Server 配置被註解
+  #   - --enable-mcpserver
+  #   - --mcp-host=0.0.0.0
+  #   - --mcp-port=9382
+  #   - --mcp-base-url=http://127.0.0.1:9380
+  #   - --mcp-script-path=/ragflow/mcp/server/server.py
+  #   - --mcp-mode=self-host
+  #   - --mcp-host-api-key=ragflow-xxxxxx...
+</code></pre>
+
+</td>
+<td>
+
+<pre><code>ragflow-server:
+  # ...其他配置
+  restart: on-failure
+  # Example configration to start Admin server:
+  #   - --enable-adminserver
+  # MCP Server 配置啟用
+  command:
+    - --enable-mcpserver
+    - --mcp-host=0.0.0.0
+    - --mcp-port=9382
+    - --mcp-base-url=http://127.0.0.1:9380
+    - --mcp-script-path=/ragflow/mcp/server/server.py
+    - --mcp-mode=self-host
+    - --mcp-host-api-key=ragflow-xxxxxx...
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+<hr>
+
+<h3>三、`docker-compose-base.yml` 檔案修改對比</h3>
+
+<h4>修改項目 1: 所有服務的重啟策略</h4>
+
+<table>
+<thead><tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>restart: unless-stopped</code></td>
+<td><code>restart: on-failure</code></td>
+</tr>
+</tbody></table>
+
+<blockquote><p>此修改適用於所有服務：<code>es</code>, <code>mysql</code>, <code>redis</code>, <code>minio</code>, <code>infinity</code>, <code>tei-cpu</code>, <code>tei-gpu</code> 等</p></blockquote>
+
+<h4>修改項目 2: Infinity 服務版本</h4>
+
+<table>
+<tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr>
+<tr>
+<td>
+
+<pre><code>infinity:
+  image: infiniflow/infinity:v0.6.11
+  restart: unless-stopped
+  # ...其他配置
+</code></pre>
+
+</td>
+<td>
+
+<pre><code>infinity:
+  image: infiniflow/infinity:v0.6.7
+  restart: on-failure
+  # ...其他配置
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+<h4>修改項目 3: TEI CPU 模型加載路徑 ⭐ 重要</h4>
+
+<table>
+<tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr>
+<tr>
+<td>
+
+<pre><code>tei-cpu:
+  profiles: ["tei-cpu"]
+  image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
+  restart: unless-stopped
+  volumes:
+    - ${HF_HOME:-$HOME/.cache/huggingface}:/data
+  command: 
+    - "--model-id"
+    - "/data/${TEI_MODEL}"
+    - "--auto-truncate"
+  # ...其他配置
+</code></pre>
+
+</td>
+<td>
+
+<pre><code>tei-cpu:
+  profiles: ["tei-cpu"]
+  image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
+  restart: on-failure
+  volumes:
+    - ${HF_HOME:-$HOME/.cache/huggingface}:/data
+  command: 
+    - "--model-id"
+    - "${TEI_MODEL}"
+    - "--auto-truncate"
+  # ...其他配置
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+<blockquote><p><strong>關鍵變更</strong>: 模型路徑從 <code>/data/${TEI<em>MODEL}</code> 改為 <code>${TEI</em>MODEL}</code>，讓 TEI 自動從 HuggingFace 下載模型</p></blockquote>
+
+<h4>修改項目 4: TEI GPU 模型加載路徑 ⭐ 重要</h4>
+
+<table>
+<tr>
+<th>原始值 ⬅️</th>
+<th>修改後 ➡️</th>
+</tr>
+<tr>
+<td>
+
+<pre><code>tei-gpu:
+  profiles: ["tei-gpu"]
+  image: ghcr.io/huggingface/text-embeddings-inference:1.5
+  restart: unless-stopped
+  volumes:
+    - ${HF_HOME:-$HOME/.cache/huggingface}:/data
+  command: 
+    - "--model-id"
+    - "/data/${TEI_MODEL}"
+    - "--auto-truncate"
+  # ...其他配置
+</code></pre>
+
+</td>
+<td>
+
+<pre><code>tei-gpu:
+  profiles: ["tei-gpu"]
+  image: ghcr.io/huggingface/text-embeddings-inference:1.5
+  restart: on-failure
+  volumes:
+    - ${HF_HOME:-$HOME/.cache/huggingface}:/data
+  command: 
+    - "--model-id"
+    - "${TEI_MODEL}"
+    - "--auto-truncate"
+  # ...其他配置
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+<blockquote><p><strong>關鍵變更</strong>: 與 TEI CPU 相同，模型路徑改為直接使用環境變數，支持自動下載</p></blockquote>
+
+<hr>
+
+<h2>結語</h2>
+
+<p>恭喜您完成 RAGFlow 的安裝與配置！現在您可以：</p>
+
+<ol>
+<li>✅ 上傳各種格式的文檔建立知識庫</li>
+<li>✅ 使用高品質的中文內嵌模型進行語義檢索</li>
+<li>✅ 透過對話界面與您的知識庫互動</li>
+<li>✅ 開發基於 RAG 的智慧應用</li>
+</ol>
+
+<p>如果遇到任何問題，請參考：</p>
+
+<ul>
+<li><a href="https://ragflow.io/docs">RAGFlow 官方文檔</a></li>
+<li><a href="https://github.com/infiniflow/ragflow/issues">GitHub Issues</a></li>
+<li><a href="https://github.com/infiniflow/ragflow/discussions">社群討論區</a></li>
+</ul>
+
+<p>祝您使用愉快！🎉</p>
+
+
+</body>
+</html>
